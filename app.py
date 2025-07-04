@@ -1,23 +1,22 @@
-from flask import Flask, request, jsonify
-import requests, string, time
+rom flask import Flask, request, jsonify
+import requests, string
 
 app = Flask(__name__)
 
 def get_suggestions(q):
-    resp = requests.get('https://suggestqueries.google.com/complete/search', params={'client':'firefox','ds':'yt','q': q})
-    return resp.json()[1]
+    r = requests.get('https://suggestqueries.google.com/complete/search', params={'client': 'firefox', 'ds': 'yt', 'q': q})
+    return r.json()[1]
 
 @app.route('/autocomplete')
 def autocomplete():
-    kw = request.args.get('keyword','').strip()
-    alphabet = request.args.get('alphabet','false').lower() == 'true'
+    kw = request.args.get('keyword', '').strip()
+    alpha = request.args.get('alphabet', 'false').lower() == 'true'
     if not kw:
-        return jsonify({'error':'keyword required'}), 400
+        return jsonify({'error': 'keyword required'}), 400
 
     suggestions = set(get_suggestions(kw))
-    if alphabet:
+    if alpha:
         for letter in string.ascii_lowercase:
-            time.sleep(0.2)
             suggestions.update(get_suggestions(f"{kw} {letter}"))
     return jsonify({'keywords': sorted(suggestions), 'count': len(suggestions)})
 
